@@ -1,4 +1,5 @@
 CREATE DATABASE Company
+-- Change Directory according to your Files
 ON (NAME=Company_db,FILENAME='E:\Database\Assignment1.mdf',
 SIZE=10,MAXSIZE=50,FILEGROWTH=5)
 
