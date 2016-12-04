@@ -1,81 +1,73 @@
 CREATE DATABASE Assignment3
-ON (NAME=Assignment3,FILENAME='E:\Database\Assignment_db.mdf',
-SIZE=10,MAXSIZE=50,FILEGROWTH=5)
-
 USE Assignment3
 GO
---Create Respective Tables
-CREATE TABLE Property
+--Table for Owner
+CREATE TABLE Owner1
 (
-	Property_no int NOT NULL PRIMARY KEY,
-	Description_ varchar(50) NULL,
-	Area int NULL
-)
+	O_name varchar(20) PRIMARY KEY,
+	Addr varchar(20),
+	Phone varchar(20)
+);
+--Table for District
 CREATE TABLE District
 (
-	District_code int NOT NULL PRIMARY KEY,
-	District_name varchar(25) NULL,
-	Tax_rate int NULL
-)
-CREATE TABLE Owner_
+	D_code int PRIMARY KEY,
+	D_name varchar(20),
+	Taxrate float,
+);
+--Table for Property
+CREATE TABLE Property
 (
-	Owner_name varchar(25) NULL,
-	Owner_phone int NOT NULL PRIMARY KEY,
-	Owner_address varchar(30) NULL,
-)
+	Pro_no int PRIMARY KEY,
+	Descp  varchar(20),
+	Area int,
+	Ref_O_name varchar(20) NOT NULL FOREIGN KEY REFERENCES Owner1(O_name),
+	Ref_D_code int NOT NULL FOREIGN KEY REFERENCES District(D_code)
+);
 
--- Property and Owner are related with Many-to-One Relationship
+INSERT INTO Owner1 VALUES('Tanmay','Pimpri','9988776655')
+INSERT INTO Owner1 VALUES('Akshaya','Sinhagad','7788996655')
+INSERT INTO Owner1 VALUES('Himani','Dhanori','2255887744')
+INSERT INTO Owner1 VALUES('Priyanka','Magarpatta','9988556644')
+INSERT INTO Owner1 VALUES('Saurabh','Dhanori','1155447788')
+INSERT INTO Owner1 VALUES('Sagar','FC Road','55666447788')
 
-ALTER TABLE Property
-ADD Owner_id int NOT NULL FOREIGN KEY REFERENCES Owner_(Owner_phone)
 
--- Property and District are also related with Many-to-One Relationship
+INSERT INTO District VALUES(1,'Pune',5)
+INSERT INTO District VALUES(2,'Sangli',3)
+INSERT INTO District VALUES(3,'Nashik',7)
+INSERT INTO District VALUES(4,'Mumbai',8)
+INSERT INTO District VALUES(5,'Thane',4)
+INSERT INTO District VALUES(6,'Nagpur',9)
 
-ALTER TABLE Property
-ADD District_id int NOT NULL FOREIGN KEY REFERENCES District(District_code)
+INSERT INTO Property VALUES(101,'Residential',15000,'Tanmay',2)
+INSERT INTO Property VALUES(102,'Commercial',17000,'Saurabh',4)
+INSERT INTO Property VALUES(103,'Agricultural',28000,'Priyanka',6)
+INSERT INTO Property VALUES(104,'Residential',65000,'Sagar',5)
+INSERT INTO Property VALUES(105,'Commercial',55000,'Himani',1)
+INSERT INTO Property VALUES(106,'Agricultural',12000,'Akshaya',3)
 
--- Insert Data into all the Tables
-INSERT INTO Property VALUES (1001,'Villa with Swimming Pool',3800,123456,411012);
-INSERT INTO Property VALUES (1002,'Deluxe PentHouse',4200,123457,411043);
-INSERT INTO Property VALUES (1003,'Bunglow at a Posh Location',12000,123457,411035);
-INSERT INTO Property VALUES (1004,'Flat with Huge Amenities',2200,123466,411043);
-INSERT INTO Property VALUES (1005,'Condo with Personal Theatre',5500,123456,411012);
-INSERT INTO Property VALUES (1006,'Duplex for Single Family',2600,123459,411001);
-INSERT INTO Property VALUES (1007,'Two Floored Flat on 18th Floor',8000,123458,411024);
-INSERT INTO Property VALUES (1008,'Three Floored Flat with Tree Balcony',8500,124456,411012);
-GO
-INSERT INTO District VALUES (411043,'Sangli',14);
-INSERT INTO District VALUES (411012,'Pune',18);
-INSERT INTO District VALUES (411001,'Mumbai',21);
-INSERT INTO District VALUES (411024,'Nashik',12);
-INSERT INTO District VALUES (411035,'Nagpur',11);
-GO
-INSERT INTO Owner_ VALUES ('Saurabh',123456,'Pune');
-INSERT INTO Owner_ VALUES ('Mr. Patil',123457,'Mumbai');
-INSERT INTO Owner_ VALUES ('Abhinandan',123458,'Nashik');
-INSERT INTO Owner_ VALUES ('Tanmay',123459,'Mumbai');
-INSERT INTO Owner_ VALUES ('Sagar',123466,'Nagpur');
-INSERT INTO Owner_ VALUES ('Ram',123356,'Sangli');
-INSERT INTO Owner_ VALUES ('Sita',124456,'Sangli');
-GO
+--List owner,property name,district
 
--- Query 1
- SELECT Owner_.Owner_name , Property.Description_ ,District.District_name
- FROM Owner_,Property,District 
- WHERE Owner_.Owner_phone = Property.Owner_id and District.District_code = Property.District_id
+SELECT O_name,Pro_no,Descp,Area,D_name
+FROM Property,Owner1,District
+WHERE Ref_O_name=O_name and Ref_D_code=D_code
 
- -- Query 2 
- SELECT Property.Property_no , Property.Description_
- FROM Property
- WHERE Property.District_id  = 411043
+--List all properties in Sangli district
 
- -- Query 3 
- SELECT SUM(Property.Area) as Total_Area_in_Pune
- FROM Property 
- WHERE Owner_id = 123456 and District_id = 411012
+SELECT Pro_no,Descp,D_name
+FROM Property,District
+WHERE Ref_D_code=D_code and D_name='Sangli'
 
- -- Query 4 
- SELECT DISTINCT Owner_.Owner_name,Property.Area, District.District_name,District.Tax_rate
- FROM Owner_,Property,District 
- WHERE Owner_.Owner_phone = Property.Owner_id and District.District_code = Property.District_id
- GROUP BY District.District_name,Owner_.Owner_name,Property.Area,District.Tax_rate
+--List total property area owned by Himani(Mr. Patil) in Pune
+
+SELECT O_name,Pro_no,Descp
+FROM Property,District,Owner1
+WHERE Ref_O_name=O_name and D_name='Pune' and O_name='Himani'
+
+--List district wise property of owner with tax rate
+
+SELECT D_name,O_name,Taxrate
+FROM Property,District,Owner1
+WHERE Ref_O_name=O_name and Ref_D_code=D_code
+GROUP BY D_name,O_name,Taxrate
